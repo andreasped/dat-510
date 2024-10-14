@@ -1,0 +1,4 @@
+Plaintext: Andreas Pedersen Security and Vulnerability in Networks
+
+Numeric key: 03342 -> 13452
+
