@@ -29,8 +29,9 @@ class Wallet:
         - Convert the bytes to a hex string.
         - Return the hex string representation (utf-8) of the private key.
         """
-        # TODO: Implement private key generation
-        pass
+        private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1).to_string()
+        private_key = private_key.hex()
+        return private_key
 
     @staticmethod
     def get_public_key(private_key_hex):
@@ -45,8 +46,12 @@ class Wallet:
         - Convert the bytes to a hex string.
         - Return the hex string representation (utf-8) of the public key.
         """
-        # TODO: Implement public key derivation
-        pass
+        private_key_hex = bytes.fromhex(private_key_hex)
+        signing_key = ecdsa.SigningKey.from_string(private_key_hex, curve=ecdsa.SECP256k1)
+        verifying_key = signing_key.get_verifying_key()
+        public_key_bytes = verifying_key.to_string()
+        public_key_hex = public_key_bytes.hex()
+        return public_key_hex
 
     def create_transaction(self, recipient_address, amount):
         """
@@ -58,5 +63,7 @@ class Wallet:
         - Sign the transaction using the sender's private key.
         - Return the signed transaction.
         """
-        # TODO: Implement transaction creation and signing
-        pass
+        transaction = Transaction(self.address, recipient_address, amount)
+        transaction.sender_public_key = self.public_key
+        transaction.sign_transaction(self.private_key)
+        return transaction

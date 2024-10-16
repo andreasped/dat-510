@@ -40,8 +40,19 @@ class Block:
         - Compute the SHA-256 hash of the bytes.
         - Return the hexadecimal digest of the hash.
         """
-        # TODO: Implement the block hashing logic
-        pass
+        serialized_transactions = [t.to_dict() for t in self.transactions]
+        transactions_json = json.dumps(serialized_transactions, sort_keys=True)
+        block_header = {
+            "index": self.index,
+            "timestamp": self.timestamp,
+            "previous_hash": self.previous_hash,
+            "transactions": transactions_json,
+            "nonce": self.nonce,
+        }
+        block_header_json = json.dumps(block_header, sort_keys=True)
+        block_header_bytes = block_header_json.encode("utf-8")
+        hash = hashlib.sha256(block_header_bytes).hexdigest()
+        return hash
 
     def has_transaction(self, transaction):
 

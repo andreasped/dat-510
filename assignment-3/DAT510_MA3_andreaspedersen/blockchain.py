@@ -69,8 +69,14 @@ class Blockchain:
             - Recompute the hash.
         - Once a valid hash is found, update the block's hash and return the hash.
         """
-        # TODO: Implement the proof-of-work algorithm
-        pass
+        block.nonce = 0
+        computed_hash = block.compute_hash()
+        while not computed_hash.startswith("0" * self.difficulty):
+            block.nonce += 1
+            computed_hash = block.compute_hash()
+            if computed_hash.startswith("0" * self.difficulty):
+                block.hash = computed_hash
+                return computed_hash
 
     def add_block(self, block, proof):
         """
@@ -84,8 +90,13 @@ class Blockchain:
         - Append the block to the chain.
         - Return True to indicate success.
         """
-        # TODO: Implement block validation and addition to the chain
-        pass
+        if block.previous_hash != self.last_block.hash:
+            return False
+        is_valid = self.is_valid_proof(block, proof)
+        if not is_valid:
+            return False
+        self.chain.append(block)
+        return True
 
     def is_valid_proof(self, block, block_hash):
         """
@@ -96,8 +107,12 @@ class Blockchain:
         - Recompute the hash of the block and compare it with block_hash.
         - Return True if both conditions are met; otherwise, return False.
         """
-        # TODO: Implement proof-of-work validation
-        pass
+        if block_hash.startswith("0" * self.difficulty):
+            recomputed_hash = block.compute_hash()
+            if recomputed_hash == block_hash:
+                return True
+            else:
+                return False
 
     def mine(self):
         """
@@ -115,8 +130,25 @@ class Blockchain:
             - If max_transactions_per_block is None, break after mining one block.
         - Return the index of the last mined block.
         """
-        # TODO: Implement the mining process
-        pass
+        if not self.unconfirmed_transactions:
+            return False
+        while self.unconfirmed_transactions:
+            selected_transactions = self.unconfirmed_transactions[:self.max_transactions_per_block]
+            for transaction in selected_transactions:
+                if not transaction.is_valid():
+                    selected_transactions.remove(transaction)
+            block = Block(
+                index=self.last_block.index + 1,
+                transactions=selected_transactions,
+                previous_hash=self.last_block.hash
+            )
+            proof = self.proof_of_work(block)
+            self.add_block(block, proof)
+            for transaction in selected_transactions:
+                self.unconfirmed_transactions.remove(transaction)
+            if self.max_transactions_per_block is None:
+                break
+        return self.last_block.index
 
     def is_chain_valid(self):
         """
@@ -133,8 +165,16 @@ class Blockchain:
               If any transaction is invalid, return False.
         - If all checks pass, return True.
         """
-        # TODO: Implement blockchain validation
-        pass
+        for i in range(1, len(self.chain)):
+            block = self.chain[i]
+            if block.hash != block.compute_hash():
+                return False
+            if block.previous_hash != self.chain[i-1].hash:
+                return False
+            for transaction in block.transactions:
+                if not transaction.is_valid():
+                    return False
+        return True
 
     def is_transaction_in_block(self, transaction, block_index):
         # First, check if the block index is valid

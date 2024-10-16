@@ -43,14 +43,7 @@ class Transaction:
     def compute_hash(self):
         """
         Compute the SHA-256 hash of the transaction.
-
-        Steps:
-        - Convert the transaction dictionary to a JSON string with sorted keys.
-        - Encode the string to bytes.
-        - Compute the SHA-256 hash of the bytes.
-        - Return the hexadecimal digest of the hash.
         """
-        # TODO: Implement the hashing logic (Implemented!)
         transaction_string = json.dumps(self.to_dict(), sort_keys=True)
         transcation_encoded = transaction_string.encode("utf-8")
         transaction_sha256 = hashlib.sha256(transcation_encoded)
@@ -70,8 +63,11 @@ class Transaction:
         Note:
         - Use the sign_deterministic method to ensure consistent signatures for testing.
         """
-        # TODO: Implement the signing logic
-        pass
+        computed_hash = self.compute_hash()
+        private_key_bytes = bytes.fromhex(private_key)
+        signing_key = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1)
+        signature_bytes = signing_key.sign_deterministic(computed_hash.encode("utf-8"))
+        self.signature = signature_bytes.hex()
 
     def is_valid(self):
         """
@@ -92,5 +88,18 @@ class Transaction:
         - If any error occurs during verification (e.g., invalid signature format),
           catch the exception and return False.
         """
-        # TODO: Implement the verification logic
-        pass
+        if self.sender_address == "0":
+            return True
+        if not self.signature or not self.sender_public_key:
+            return False
+        try:
+            public_key_bytes = bytes.fromhex(self.sender_public_key)
+            signature_bytes = bytes.fromhex(self.signature)
+            verifying_key = ecdsa.VerifyingKey.from_string(public_key_bytes, curve=ecdsa.SECP256k1)
+            computed_hash = self.compute_hash()
+            if verifying_key.verify(signature_bytes, computed_hash.encode("utf-8")) == True:
+                return True
+            else:
+                return False
+        except:
+            return False
