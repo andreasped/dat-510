@@ -10,7 +10,7 @@
 2. Change into correct directory:
 
     ```bash
-    cd dat510-assignment1
+    cd DAT510_MA1_andreaspedersen
     ```
 
 3. Install dependencies:
@@ -21,7 +21,7 @@
 
 ## File Structure
 ```bash
-dat510-assignment1/
+DAT510_MA1_andreaspedersen/
 ├── requirements.txt    #contains the required dependencies
 ├── README.md
 ├── config.py           #python module holding plaintext and keys
@@ -35,4 +35,3 @@ dat510-assignment1/
 ```bash
 python3 task_X.py
 ```
-
